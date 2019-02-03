@@ -15,7 +15,7 @@ class CreateStudentsTable extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('teacher_id')->unsigned();
+            $table->integer('teacher_id')->unsigned()->default(1);
             $table->foreign('teacher_id')->references('id')->on('teachers')->onDelete('restrict');
             $table->string('first_name');
             $table->string('last_name');

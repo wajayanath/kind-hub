@@ -14,7 +14,8 @@ class StudentController extends Controller
      */
     public function index()
     {
-        //
+        $students = Student::all();
+        return response()->json(['students'=>$students],200);
     }
 
     /**
@@ -35,7 +36,9 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $student = new Student($request->all());
+        $student->save();
+        return response()->json(['message'=>"Student record created successfuly"],201);
     }
 
     /**
@@ -55,9 +58,10 @@ class StudentController extends Controller
      * @param  \App\Student  $student
      * @return \Illuminate\Http\Response
      */
-    public function edit(Student $student)
+    public function edit($id)
     {
-        //
+        $student = Student::find($id);
+        return response()->json(['student'=>$student],200);
     }
 
     /**
@@ -67,9 +71,14 @@ class StudentController extends Controller
      * @param  \App\Student  $student
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Student $student)
+    public function update(Request $request, $id)
     {
-        //
+        $student = Student::find($id);
+        if (!$student) {
+            return response()->json(['message'=>"Student not found"],404);
+        }
+        $student->update($request->all());
+        return response()->json(['message'=>"Student updated successfuly"],200);
     }
 
     /**
@@ -78,8 +87,13 @@ class StudentController extends Controller
      * @param  \App\Student  $student
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Student $student)
+    public function destroy($id)
     {
-        //
+        $student = Student::find($id);
+        if (!$student) {
+            return response()->json(['message'=>"Student not found"],404);
+        }
+        $student->delete();
+            return response()->json(['message'=>"Student deleted successfuly"],200);
     }
 }
