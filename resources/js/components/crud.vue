@@ -6,7 +6,7 @@
                     <div class="card-header">
                         <h3 class="card-title float-left">Student Details</h3>
                         <div class="card-tools">
-                            <button class="btn btn-success float-right" data-toggle="modal" data-target="#addModel">Add New </button>
+                            <button class="btn btn-success float-right" data-toggle="modal" data-target="#addModal">Add New </button>
                         </div>
                     </div>
                     <div class="card-body">
@@ -36,16 +36,26 @@
         </div>
 
         <!-- Modal -->
-        <div class="modal fade" id="addModel" tabindex="-1" role="dialog" aria-labelledby="addModelLabel" aria-hidden="true">
+        <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addModelLabel">Register Student</h5>
+                <h5 class="modal-title" id="addModalLabel">Register Student</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
                 </button>
             </div>
+            <form @submit.prevent="createStudent">
             <div class="modal-body">
+                <div class="form-group">
+                    <label>Select Your Class Teacher</label>
+                    <select class="form-control" v-model="form.teacher_id" name="teacher_id">
+                        <option value="" disabled selected>Select your class teacher</option>
+                        <option value="1">Emily</option>
+                        <option value="2">Isabella</option>
+                    </select>
+                    <has-error :form="form" field="teacher_id"></has-error>
+                </div>
 
                 <div class="form-group">
                     <label>First Name</label>
@@ -63,24 +73,32 @@
 
                 <div class="form-group">
                     <label>Gender</label>
-                    <input v-model="form.gender" type="gender" name="gender"
-                        class="form-control" :class="{ 'is-invalid': form.errors.has('gender') }">
+                    <select class="form-control" v-model="form.gender" name="gender">
+                        <option value="" disabled selected>Gender</option>
+                        <option value="M">Male</option>
+                        <option value="F">Female</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
                     <label>Joined Year</label>
-                    <input v-model="form.joined_year" type="joined_year" name="joined_year"
-                        class="form-control" :class="{ 'is-invalid': form.errors.has('joined_year') }">
+                    <select class="form-control" v-model="form.joined_year" name="joined_year">
+                        <option value="" disabled selected>Joined Year</option>
+                        <option value="2017">2017</option>
+                        <option value="2018">2018</option>
+                        <option value="2019">2019</option>
+                    </select>
                 </div>
 
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Create</button>
+                <button type="submit" class="btn btn-primary">Create</button>
             </div>
+            </form>
             </div>
         </div>
-</div>
+        </div>
 
     </div>
 </template>
@@ -90,6 +108,7 @@
         data() {
             return {
                 form: new Form({
+                    teacher_id: '',
                     first_name: '',
                     last_name: '',
                     gender: '',
@@ -99,12 +118,20 @@
             }
         },
         methods: {
+            createStudent() {
+                this.form.post('api/students');
+                $('#addModal').modal('hide');
+                Fire.$emit('AfterCreate');
+            },
             loadStudents() {
                 axios.get('api/students').then(({data}) => (this.students = data.students));
             }
         },
         created () {
             this.loadStudents()
+            Fire.$on('AfterCreate', () => {
+                this.loadStudents();
+            });
         },
         mounted() {
             console.log('Component mounted.')
