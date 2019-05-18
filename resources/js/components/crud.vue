@@ -6,7 +6,7 @@
                     <div class="card-header">
                         <h3 class="card-title float-left">Student Details</h3>
                         <div class="card-tools">
-                            <button class="btn btn-success float-right" data-toggle="modal" data-target="#addModal">Add New </button>
+                            <button class="btn btn-success float-right" @click="newModal">Add New </button>
                         </div>
                     </div>
                     <div class="card-body">
@@ -26,7 +26,7 @@
                                 <td>{{ student.first_name }}</td>
                                 <td>{{ student.last_name }}</td>
                                 <td>{{ student.gender }}</td>
-                                <td><a href="#">Edit</a>/<a  href="#">Delete</a></td>
+                                <td><a href="#" @click="editModal(student)">Edit</a>/<a href="#" @click="deleteStudent(student.id)">Delete</a></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -40,12 +40,13 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addModalLabel">Register Student</h5>
+                <h5 class="modal-title" v-show="!editmode" id="addModalLabel">Register Student</h5>
+                <h5 class="modal-title" v-show="editmode" id="updateModalLabel">Update Student</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form @submit.prevent="createStudent">
+            <form @submit.prevent="editmode ? updateStudent() : createStudent()">
             <div class="modal-body">
                 <div class="form-group">
                     <label>Select Your Class Teacher</label>
@@ -93,7 +94,8 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Create</button>
+                <button v-show="editmode" type="submit" class="btn btn-success">Update</button>
+                <button v-show="!editmode" type="submit" class="btn btn-primary">Create</button>
             </div>
             </form>
             </div>
@@ -107,7 +109,9 @@
     export default {
         data() {
             return {
+                editmode:false,
                 form: new Form({
+                    id: '',
                     teacher_id: '',
                     first_name: '',
                     last_name: '',
@@ -118,13 +122,80 @@
             }
         },
         methods: {
+            updateStudent(id) {
+                this.form.put('api/students/'+this.form.id)
+                .then(()=> {
+                    $('#addModal').modal('hide');
+                    Swal.fire(
+                    'Update!',
+                    'Your record has been updated.',
+                    'success'
+                    )
+                    Fire.$emit('AfterCreate');
+                })
+                .catch(()=> {
+
+                });
+            },
+            newModal() {
+                this.editmode =  false;
+                this.form.reset();
+                $('#addModal').modal('show');
+            },
+            editModal(student) {
+                this.editmode =  true;
+                this.form.reset();
+                $('#addModal').modal('show');
+                this.form.fill(student);
+            },
+            deleteStudent(id) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.value) {
+                        this.form.delete('api/students/'+id)
+                            .then(()=> {
+                                    Swal.fire(
+                                    'Deleted!',
+                                    'Your file has been deleted.',
+                                    'success'
+                                    )
+                                Fire.$emit('AfterCreate');
+                            })
+                            .catch(()=> {
+                                    Swal.fire('Failed!',
+                                    'There was something wrong.',
+                                    'warning'
+                                    )
+                            });
+                        }
+                    })
+            },
             createStudent() {
-                this.form.post('api/students');
-                $('#addModal').modal('hide');
-                Fire.$emit('AfterCreate');
+                this.form.post('api/students')
+                .then(() => {
+                    Toast.fire({
+                        type: 'success',
+                        title: 'created in successfully'
+                    })
+                    $('#addModal').modal('hide');
+                    Fire.$emit('AfterCreate');
+                })
+                .catch(() => {
+                     Swal.fire('Failed!',
+                    'There was something wrong.',
+                    'warning'
+                    )
+                });
             },
             loadStudents() {
-                axios.get('api/students').then(({data}) => (this.students = data.students));
+                axios.get('api/students').then(({data}) => (this.students = data.students.data));
             }
         },
         created () {
