@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use App\Student;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\StudentResource;
 
 class StudentController extends Controller
 {
@@ -15,6 +16,7 @@ class StudentController extends Controller
      */
     public function index()
     {
+        // $students = StudentResource::collection(Student::latest()->paginate(5));
         $students = Student::latest()->paginate(5);
         return response()->json(['students'=>$students],200);
     }
@@ -37,6 +39,13 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
+        $this->validate($request, [
+            'first_name' => 'required|string|max:10',
+            'last_name' => 'required|string|max:20',
+            'gender' => 'required',
+            'joined_year' => 'required',
+        ]);
+
         $student = Student::create($request->all());
         return response()->json($student,201);
     }
@@ -73,6 +82,13 @@ class StudentController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $this->validate($request, [
+            'first_name' => 'required|string|max:10',
+            'last_name' => 'required|string|max:20',
+            'gender' => 'required',
+            'joined_year' => 'required',
+        ]);
+
         $student = Student::find($id);
         if (!$student) {
             return response()->json(['message'=>"Student not found"],404);

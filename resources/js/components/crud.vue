@@ -17,7 +17,8 @@
                                 <th scope="col">First name</th>
                                 <th scope="col">Last name</th>
                                 <th scope="col">Gender</th>
-                                <th scope="col">modify</th>
+                                <th scope="col">Joined Year</th>
+                                <th scope="col">Modify</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -26,6 +27,7 @@
                                 <td>{{ student.first_name }}</td>
                                 <td>{{ student.last_name }}</td>
                                 <td>{{ student.gender }}</td>
+                                <td>{{ student.joined_year }}</td>
                                 <td><a href="#" @click="editModal(student)">Edit</a>/<a href="#" @click="deleteStudent(student.id)">Delete</a></td>
                                 </tr>
                             </tbody>
@@ -74,21 +76,23 @@
 
                 <div class="form-group">
                     <label>Gender</label>
-                    <select class="form-control" v-model="form.gender" name="gender">
+                    <select v-model="form.gender" name="gender" class="form-control" :class="{ 'is-invalid': form.errors.has('gender') }">
                         <option value="" disabled selected>Gender</option>
                         <option value="M">Male</option>
                         <option value="F">Female</option>
                     </select>
+                    <has-error :form="form" field="gender"></has-error>
                 </div>
 
                 <div class="form-group">
                     <label>Joined Year</label>
-                    <select class="form-control" v-model="form.joined_year" name="joined_year">
+                    <select class="form-control" v-model="form.joined_year" name="joined_year" :class="{ 'is-invalid': form.errors.has('joined_year') }">
                         <option value="" disabled selected>Joined Year</option>
                         <option value="2017">2017</option>
                         <option value="2018">2018</option>
                         <option value="2019">2019</option>
                     </select>
+                    <has-error :form="form" field="joined_year"></has-error>
                 </div>
 
             </div>
